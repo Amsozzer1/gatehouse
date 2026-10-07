@@ -10,7 +10,7 @@ Planning docs live in `.private/` (gitignored): `PRD.md` is the spec to build, `
 - Build: `pnpm install && pnpm typecheck`
 - Seed the template database: `pnpm seed`
 - Test: `pnpm test`
-- Replay the session against one target: `pnpm trace --target service|user`
+- Replay the session against one target: `pnpm trace --target service|user|gateway [--observe]`
 - Run the demo: `[command]`
 - Measure / regenerate results: `[command]`
 
