@@ -13,7 +13,8 @@ Planning docs live in `.private/` (gitignored): `PRD.md` is the spec to build, `
 - Replay the session against one target: `pnpm trace --target service|user|gateway [--observe]`
 - Run the systems and gateway locally on fixed ports: `pnpm stack [--observe]`
 - Approve or reject a held write on that stack: `pnpm approve <id> --as <person>`, `pnpm reject <id> --as <person>`
-- Run the demo: `[command]`
+- Run the demo: `pnpm dev`, then open http://localhost:3000 (paced replay of the measured run)
+- Record `docs/demo.gif`: `PLAYWRIGHT_BROWSERS_PATH=data/ms-playwright pnpm record` (needs ffmpeg and `npx playwright install chromium`)
 - Measure / regenerate results: `pnpm measure` (writes `results/`, `results/numbers.md` and the generated parts of the README); `pnpm measure --check` fails if any deterministic number changed
 
 ## How to work
