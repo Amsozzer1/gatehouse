@@ -3,7 +3,7 @@
 Every number that appears in the README, and where it comes from. All of them are produced by one command on
 seed 42. The counters are deterministic: the same command gives the same numbers, which CI checks with `pnpm measure --check`.
 The seed sweep is also deterministic. Latency is wall-clock time, so it is not deterministic and is not part of the CI check.
-The session has 20 tool calls; the mock systems expose 40 tools in total.
+The session has 20 tool calls; the mock systems expose 40 tools in total. Last measured on Postgres 15.13.
 
 | Number | What it measures | Single run or aggregate | Runs / seeds | Produced by | Raw output |
 |---|---|---|---|---|---|
@@ -12,6 +12,8 @@ The session has 20 tool calls; the mock systems expose 40 tools in total.
 | 50 | Of those, reached through tools outside the team's bundle, shared service account | Single run, deterministic | Seed 42, 1 run per target | `pnpm measure` (`scripts/measure.ts`) | `results/run-service.jsonl`, `results/summary.json` |
 | 6 | Distinct restricted values written where someone who may not see them can read them, shared service account | Single run, deterministic | Seed 42, 1 run per target | `pnpm measure` (`scripts/measure.ts`) | `results/run-service.jsonl`, `results/summary.json` |
 | 8 of 8 | Writes that reached a system with no approval id, shared service account | Single run, deterministic | Seed 42, 1 run per target | `pnpm measure` (`scripts/measure.ts`) | `results/run-service.jsonl`, `results/summary.json` |
+| 6 of 8 | Of those, writes that skipped a sign-off the team's policy requires (the tool needs sign-off, or isn't in the team's bundle at all), shared service account | Single run, deterministic | Seed 42, 1 run per target | `pnpm measure` (`scripts/measure.ts`) | `results/run-service.jsonl`, `results/summary.json` |
+| 2 | Of those, routine writes the team's policy allows without sign-off, shared service account | Single run, deterministic | Seed 42, 1 run per target | `pnpm measure` (`scripts/measure.ts`) | `results/run-service.jsonl`, `results/summary.json` |
 | 14 of 16 | Legitimate tasks fully served, shared service account | Single run, deterministic | Seed 42, 1 run per target | `pnpm measure` (`scripts/measure.ts`) | `results/run-service.jsonl`, `results/summary.json` |
 | 3843 | Tool-schema tokens (js-tiktoken cl100k, a proxy) in the rep persona's context, shared service account | Single run, deterministic | Seed 42, 1 run per target | `pnpm measure` (`scripts/measure.ts`) | `results/summary.json` |
 | 40 | Tools listed to the rep persona's agent, shared service account | Single run, deterministic | Seed 42, 1 run per target | `pnpm measure` (`scripts/measure.ts`) | `results/summary.json` |
@@ -24,6 +26,8 @@ The session has 20 tool calls; the mock systems expose 40 tools in total.
 | 0 | Of those, reached through tools outside the team's bundle, per-user token | Single run, deterministic | Seed 42, 1 run per target | `pnpm measure` (`scripts/measure.ts`) | `results/run-user.jsonl`, `results/summary.json` |
 | 6 | Distinct restricted values written where someone who may not see them can read them, per-user token | Single run, deterministic | Seed 42, 1 run per target | `pnpm measure` (`scripts/measure.ts`) | `results/run-user.jsonl`, `results/summary.json` |
 | 7 of 7 | Writes that reached a system with no approval id, per-user token | Single run, deterministic | Seed 42, 1 run per target | `pnpm measure` (`scripts/measure.ts`) | `results/run-user.jsonl`, `results/summary.json` |
+| 5 of 7 | Of those, writes that skipped a sign-off the team's policy requires (the tool needs sign-off, or isn't in the team's bundle at all), per-user token | Single run, deterministic | Seed 42, 1 run per target | `pnpm measure` (`scripts/measure.ts`) | `results/run-user.jsonl`, `results/summary.json` |
+| 2 | Of those, routine writes the team's policy allows without sign-off, per-user token | Single run, deterministic | Seed 42, 1 run per target | `pnpm measure` (`scripts/measure.ts`) | `results/run-user.jsonl`, `results/summary.json` |
 | 15 of 16 | Legitimate tasks fully served, per-user token | Single run, deterministic | Seed 42, 1 run per target | `pnpm measure` (`scripts/measure.ts`) | `results/run-user.jsonl`, `results/summary.json` |
 | 3843 | Tool-schema tokens (js-tiktoken cl100k, a proxy) in the rep persona's context, per-user token | Single run, deterministic | Seed 42, 1 run per target | `pnpm measure` (`scripts/measure.ts`) | `results/summary.json` |
 | 40 | Tools listed to the rep persona's agent, per-user token | Single run, deterministic | Seed 42, 1 run per target | `pnpm measure` (`scripts/measure.ts`) | `results/summary.json` |
@@ -36,6 +40,11 @@ The session has 20 tool calls; the mock systems expose 40 tools in total.
 | 0 | Of those, reached through tools outside the team's bundle, gateway | Single run, deterministic | Seed 42, 1 run per target | `pnpm measure` (`scripts/measure.ts`) | `results/run-gateway.jsonl`, `results/summary.json` |
 | 0 | Distinct restricted values written where someone who may not see them can read them, gateway | Single run, deterministic | Seed 42, 1 run per target | `pnpm measure` (`scripts/measure.ts`) | `results/run-gateway.jsonl`, `results/summary.json` |
 | 2 of 6 | Writes that reached a system with no approval id, gateway | Single run, deterministic | Seed 42, 1 run per target | `pnpm measure` (`scripts/measure.ts`) | `results/run-gateway.jsonl`, `results/summary.json` |
+| 0 of 6 | Of those, writes that skipped a sign-off the team's policy requires (the tool needs sign-off, or isn't in the team's bundle at all), gateway | Single run, deterministic | Seed 42, 1 run per target | `pnpm measure` (`scripts/measure.ts`) | `results/run-gateway.jsonl`, `results/summary.json` |
+| 2 | Of those, routine writes the team's policy allows without sign-off, gateway | Single run, deterministic | Seed 42, 1 run per target | `pnpm measure` (`scripts/measure.ts`) | `results/run-gateway.jsonl`, `results/summary.json` |
+| 4 | Writes the gateway held for sign-off | Single run, deterministic | Seed 42, 1 run per target | `pnpm measure` (`scripts/measure.ts`) | `results/run-gateway.jsonl`, `results/summary.json` |
+| 4 | Of those, approved by the EMEA lead and run | Single run, deterministic | Seed 42, 1 run per target | `pnpm measure` (`scripts/measure.ts`) | `results/run-gateway.jsonl`, `results/summary.json` |
+| 12 of 16 | Legitimate calls that had something pinned or held (region pinned, row limit clamped, fields removed, or a write held) | Single run, deterministic | Seed 42, 1 run per target | `pnpm measure` (`scripts/measure.ts`) | `results/run-gateway.jsonl`, `results/summary.json` |
 | 16 of 16 | Legitimate tasks fully served, gateway | Single run, deterministic | Seed 42, 1 run per target | `pnpm measure` (`scripts/measure.ts`) | `results/run-gateway.jsonl`, `results/summary.json` |
 | 1774 | Tool-schema tokens (js-tiktoken cl100k, a proxy) in the rep persona's context, gateway | Single run, deterministic | Seed 42, 1 run per target | `pnpm measure` (`scripts/measure.ts`) | `results/summary.json` |
 | 14 | Tools listed to the rep persona's agent, gateway | Single run, deterministic | Seed 42, 1 run per target | `pnpm measure` (`scripts/measure.ts`) | `results/summary.json` |

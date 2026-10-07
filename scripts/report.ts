@@ -6,6 +6,10 @@ interface TargetNumbers {
   exposure: { rows: number; fields: number; aggregateInputs: number; beyondUser: number; viaToolsOutsideBundle: number };
   restrictedValuesWrittenWider: number;
   writesWithoutSignoff: number;
+  writesSkippingRequiredSignoff: number;
+  routineUnsignedWrites: number;
+  writesHeld: number;
+  writesHeldThenApproved: number;
   writesTotal: number;
   legitimate: { total: number; served: number; notServed: { step: string; reason: string }[] };
   decisions: Record<string, number>;
@@ -36,12 +40,18 @@ const LABELS: Record<string, string> = {
 export function resultsTable(d: Deterministic): string {
   const rows = ["service", "user", "gateway"].map((k) => {
     const t = d.targets[k]!;
-    return `| ${LABELS[k]} | ${t.itemsOutsideScope} | ${t.exposure.beyondUser} | ${t.restrictedValuesWrittenWider} | ${t.writesWithoutSignoff} of ${t.writesTotal} | ${t.toolTokens.rep} | ${t.legitimate.served} of ${t.legitimate.total} |`;
+    return `| ${LABELS[k]} | ${t.itemsOutsideScope} | ${t.exposure.beyondUser} | ${t.restrictedValuesWrittenWider} | ${t.writesSkippingRequiredSignoff} of ${t.writesTotal} | ${t.toolTokens.rep} | ${t.legitimate.served} of ${t.legitimate.total} |`;
   });
+  const routine = ["service", "user", "gateway"].map((k) => d.targets[k]!.routineUnsignedWrites);
+  const note = routine.every((n) => n === routine[0])
+    ? `In every column, ${routine[0]} routine support ${routine[0] === 1 ? "write" : "writes"} also ran unsigned, because the support bundle doesn't require sign-off for ${routine[0] === 1 ? "it" : "them"}; they are counted in the totals, not in the column.`
+    : `Routine writes that ran unsigned because the policy doesn't require sign-off for them: ${routine.join(", ")} (service account, per-user token, gateway); they are counted in the totals, not in the column.`;
   return [
-    "| Agent connects through | Items outside the team's scope | of which beyond the user's own permissions | Restricted values written where more people can read them | Writes without sign-off | Tool-schema tokens in the EMEA agent's context | Legitimate tasks fully served |",
+    "| Agent connects through | Items outside the team's scope | of which beyond the user's own permissions | Restricted values written where more people can read them | Writes that skipped a sign-off the team's policy requires | Tool-schema tokens in the EMEA agent's context | Legitimate tasks fully served |",
     "|---|---|---|---|---|---|---|",
     ...rows,
+    "",
+    note,
   ].join("\n");
 }
 
@@ -49,16 +59,16 @@ export function caption(d: Deterministic, replay: Replay): string {
   const s = d.targets.service!;
   const u = d.targets.user!;
   const g = d.targets.gateway!;
-  const held = replay.steps.filter((x) => x.cells.gateway!.decision === "held").length;
-  const heldApproved = replay.steps.filter((x) => x.cells.gateway!.decision === "held" && x.cells.gateway!.signedWrites > 0).length;
+  const held = g.writesHeld;
+  const heldApproved = g.writesHeldThenApproved;
   const unsignedBundles = [...new Set(replay.steps.filter((x) => x.cells.gateway!.unsignedWrites > 0).map((x) => replay.personas[x.persona]!.bundle))];
-  const unsignedNote = g.writesWithoutSignoff === 0 ? ""
-    : `; the ${g.writesWithoutSignoff} unsigned ${g.writesWithoutSignoff === 1 ? "write is" : "writes are"} from the ${unsignedBundles.join(" and ")} `
-      + `${unsignedBundles.length === 1 ? "bundle, whose" : "bundles, whose"} policy doesn't require sign-off for them`;
+  const unsignedNote = g.routineUnsignedWrites === 0 ? ""
+    : `; ${g.routineUnsignedWrites} routine ${g.routineUnsignedWrites === 1 ? "write" : "writes"} from the ${unsignedBundles.join(" and ")} `
+      + `${unsignedBundles.length === 1 ? "bundle ran" : "bundles ran"} unsigned, as ${unsignedBundles.length === 1 ? "its" : "their"} policy allows`;
   return [
     `*Paced replay of one scripted session (${d.steps} tool calls, no LLM; the systems and data are fake). `,
     `Middle: the agent uses each person's own token. ${u.itemsOutsideScope} items outside the EMEA team's scope reach it, `,
-    `${u.restrictedValuesWrittenWider} discount floors end up in a ticket comment that support can read, and ${u.writesWithoutSignoff} writes run with no sign-off. `,
+    `${u.restrictedValuesWrittenWider} discount floors end up in a ticket comment that support can read, and ${u.writesSkippingRequiredSignoff} writes that the team's policy says need sign-off run without it. `,
     `Right: the same calls through the gateway. ${g.itemsOutsideScope} items outside the scope, ${g.restrictedValuesWrittenWider} restricted values written, `,
     `${held} writes held and ${heldApproved} of them approved by the EMEA lead${unsignedNote}. `,
     `Left, muted: a shared service account, ${s.itemsOutsideScope} items, `,
@@ -117,7 +127,7 @@ export interface Optional {
   latency?: { warmup: number; callsPerRun: number; runs: number; machine: { cpu: string; cores: number; memoryGb: number; platform: string; node: string }; aggregate: Record<string, number> };
 }
 
-export function renderNumbers(d: Deterministic, opt: Optional = {}): string {
+export function renderNumbers(d: Deterministic, opt: Optional = {}, postgres = "unknown"): string {
   const src = "`pnpm measure` (`scripts/measure.ts`)";
   const line = (n: string | number, what: string, raw: string) =>
     `| ${n} | ${what} | Single run, deterministic | Seed ${d.seed}, 1 run per target | ${src} | ${raw} |`;
@@ -131,6 +141,13 @@ export function renderNumbers(d: Deterministic, opt: Optional = {}): string {
     rows.push(line(t.exposure.viaToolsOutsideBundle, `Of those, reached through tools outside the team's bundle, ${who}`, raw));
     rows.push(line(t.restrictedValuesWrittenWider, `Distinct restricted values written where someone who may not see them can read them, ${who}`, raw));
     rows.push(line(`${t.writesWithoutSignoff} of ${t.writesTotal}`, `Writes that reached a system with no approval id, ${who}`, raw));
+    rows.push(line(`${t.writesSkippingRequiredSignoff} of ${t.writesTotal}`, `Of those, writes that skipped a sign-off the team's policy requires (the tool needs sign-off, or isn't in the team's bundle at all), ${who}`, raw));
+    rows.push(line(t.routineUnsignedWrites, `Of those, routine writes the team's policy allows without sign-off, ${who}`, raw));
+    if (k === "gateway") {
+      rows.push(line(t.writesHeld, "Writes the gateway held for sign-off", raw));
+      rows.push(line(t.writesHeldThenApproved, "Of those, approved by the EMEA lead and run", raw));
+      rows.push(line(`${d.gatewayCostOfScoping.length} of ${t.legitimate.total}`, "Legitimate calls that had something pinned or held (region pinned, row limit clamped, fields removed, or a write held)", raw));
+    }
     rows.push(line(`${t.legitimate.served} of ${t.legitimate.total}`, `Legitimate tasks fully served, ${who}`, raw));
     for (const [persona, n] of Object.entries(t.toolTokens)) {
       rows.push(line(n, `Tool-schema tokens (js-tiktoken cl100k, a proxy) in the ${persona} persona's context, ${who}`, "`results/summary.json`"));
@@ -172,7 +189,7 @@ export function renderNumbers(d: Deterministic, opt: Optional = {}): string {
     "Every number that appears in the README, and where it comes from. All of them are produced by one command on",
     `seed ${d.seed}. The counters are deterministic: the same command gives the same numbers, which CI checks with \`pnpm measure --check\`.`,
     "The seed sweep is also deterministic. Latency is wall-clock time, so it is not deterministic and is not part of the CI check.",
-    `The session has ${d.steps} tool calls; the mock systems expose ${d.catalogTools} tools in total.`,
+    `The session has ${d.steps} tool calls; the mock systems expose ${d.catalogTools} tools in total. Last measured on Postgres ${postgres}.`,
     "",
     "| Number | What it measures | Single run or aggregate | Runs / seeds | Produced by | Raw output |",
     "|---|---|---|---|---|---|",

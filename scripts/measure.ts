@@ -68,6 +68,32 @@ for (const key of ["service", "user", "gateway", "observe"] as const) {
   }
 }
 
+/**
+ * Unsigned writes, split by what the team's policy says about the tool:
+ * needs sign-off, not in the team's bundle at all, or routine (allowed without sign-off).
+ */
+function unsignedByPolicy(results: StepResult[]) {
+  const out = { skippedSignoff: 0, routine: 0 };
+  for (const r of results) {
+    const b = policy.bundles[r.bundle]!;
+    for (const w of r.writes) {
+      if (w.approval_id !== null) continue;
+      if (b.tools.includes(r.tool) && !b.approvals.includes(r.tool)) out.routine++;
+      else out.skippedSignoff++;
+    }
+  }
+  return out;
+}
+
+const postgresVersion = await (async () => {
+  const pg = (await import("pg")).default;
+  const c = new pg.Client({ connectionString: (await import("../packages/systems/src/db.js")).databaseUrl() });
+  await c.connect();
+  const v = (await c.query<{ server_version: string }>("show server_version")).rows[0]!.server_version;
+  await c.end();
+  return v.split(" ")[0]!;
+})();
+
 const deterministic = {
   seed: SEED,
   steps: trace.steps.length,
@@ -77,6 +103,10 @@ const deterministic = {
     exposure: runs[k].summary.exposure,
     restrictedValuesWrittenWider: runs[k].summary.restrictedValuesWrittenWider,
     writesWithoutSignoff: runs[k].summary.writesWithoutSignoff,
+    writesSkippingRequiredSignoff: unsignedByPolicy(runs[k].results).skippedSignoff,
+    routineUnsignedWrites: unsignedByPolicy(runs[k].results).routine,
+    writesHeld: runs[k].results.filter((r) => r.decision === "held").length,
+    writesHeldThenApproved: runs[k].results.filter((r) => r.decision === "held" && r.approval?.status === "executed").length,
     writesTotal: runs[k].summary.writesTotal,
     legitimate: runs[k].summary.legitimate,
     decisions: runs[k].summary.decisions,
@@ -124,6 +154,8 @@ const replay = {
         beyondUser: r.exposure.beyondUser,
         writtenWider: [...new Set(r.writtenWider)].length,
         unsignedWrites: r.writes.filter((w) => w.approval_id === null).length,
+        skippedSignoff: unsignedByPolicy([r]).skippedSignoff,
+        routineWrites: unsignedByPolicy([r]).routine,
         signedWrites: r.writes.filter((w) => w.approval_id !== null).length,
         returned: r.data ? ((r.data.rows as unknown[] | undefined)?.length ?? (r.data.row ? 1 : 0)) : 0,
         approval: r.approval?.status ?? null,
@@ -137,7 +169,7 @@ writeFileSync(new URL("../apps/web/public/replay.json", import.meta.url), `${JSO
 
 const optional = (name: string) => (existsSync(new URL(name, out)) ? JSON.parse(readFileSync(new URL(name, out), "utf8")) : undefined);
 const extra = { seeds: optional("seeds.json"), latency: optional("latency.json") };
-writeFileSync(new URL("numbers.md", out), renderNumbers(deterministic, extra));
+writeFileSync(new URL("numbers.md", out), renderNumbers(deterministic, extra, postgresVersion));
 const readmeUrl = new URL("../README.md", import.meta.url);
 writeFileSync(readmeUrl, renderReadme(readFileSync(readmeUrl, "utf8"), deterministic, replay, extra));
 console.log(JSON.stringify(deterministic.targets, null, 2));

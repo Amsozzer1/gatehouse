@@ -9,7 +9,7 @@ When a team connects an agent to company systems, the quick setup is one service
 ![Replay of one scripted session: shared service account, own token, and through the gateway](docs/demo.gif)
 
 <!-- caption:start -->
-*Paced replay of one scripted session (20 tool calls, no LLM; the systems and data are fake). Middle: the agent uses each person's own token. 137 items outside the EMEA team's scope reach it, 6 discount floors end up in a ticket comment that support can read, and 7 writes run with no sign-off. Right: the same calls through the gateway. 0 items outside the scope, 0 restricted values written, 4 writes held and 4 of them approved by the EMEA lead; the 2 unsigned writes are from the support bundle, whose policy doesn't require sign-off for them. Left, muted: a shared service account, 304 items, 167 of them beyond what the user could see at all.*
+*Paced replay of one scripted session (20 tool calls, no LLM; the systems and data are fake). Middle: the agent uses each person's own token. 137 items outside the EMEA team's scope reach it, 6 discount floors end up in a ticket comment that support can read, and 5 writes that the team's policy says need sign-off run without it. Right: the same calls through the gateway. 0 items outside the scope, 0 restricted values written, 4 writes held and 4 of them approved by the EMEA lead; 2 routine writes from the support bundle ran unsigned, as its policy allows. Left, muted: a shared service account, 304 items, 167 of them beyond what the user could see at all.*
 <!-- caption:end -->
 
 ## Results
@@ -17,11 +17,13 @@ When a team connects an agent to company systems, the quick setup is one service
 Measured by `pnpm measure` on seed 42: the same 20 tool calls against each setup, each on a fresh copy of the seed database, with every number computed by an independent permission oracle (see How it works). The counters are deterministic and CI re-measures them on every push. Apple M4, 16 GB, macOS, Node 24, Postgres 15.13.
 
 <!-- results:start -->
-| Agent connects through | Items outside the team's scope | of which beyond the user's own permissions | Restricted values written where more people can read them | Writes without sign-off | Tool-schema tokens in the EMEA agent's context | Legitimate tasks fully served |
+| Agent connects through | Items outside the team's scope | of which beyond the user's own permissions | Restricted values written where more people can read them | Writes that skipped a sign-off the team's policy requires | Tool-schema tokens in the EMEA agent's context | Legitimate tasks fully served |
 |---|---|---|---|---|---|---|
-| Shared service account | 304 | 167 | 6 | 8 of 8 | 3843 | 14 of 16 |
-| Per-user token | 137 | 0 | 6 | 7 of 7 | 3843 | 15 of 16 |
-| **Through the gateway** | 0 | 0 | 0 | 2 of 6 | 1774 | 16 of 16 |
+| Shared service account | 304 | 167 | 6 | 6 of 8 | 3843 | 14 of 16 |
+| Per-user token | 137 | 0 | 6 | 5 of 7 | 3843 | 15 of 16 |
+| **Through the gateway** | 0 | 0 | 0 | 0 of 6 | 1774 | 16 of 16 |
+
+In every column, 2 routine support writes also ran unsigned, because the support bundle doesn't require sign-off for them; they are counted in the totals, not in the column.
 <!-- results:end -->
 
 <!-- summary:start -->

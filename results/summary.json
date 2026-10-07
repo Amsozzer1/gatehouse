@@ -14,6 +14,10 @@
       },
       "restrictedValuesWrittenWider": 6,
       "writesWithoutSignoff": 8,
+      "writesSkippingRequiredSignoff": 6,
+      "routineUnsignedWrites": 2,
+      "writesHeld": 0,
+      "writesHeldThenApproved": 0,
       "writesTotal": 8,
       "legitimate": {
         "total": 16,
@@ -54,6 +58,10 @@
       },
       "restrictedValuesWrittenWider": 6,
       "writesWithoutSignoff": 7,
+      "writesSkippingRequiredSignoff": 5,
+      "routineUnsignedWrites": 2,
+      "writesHeld": 0,
+      "writesHeldThenApproved": 0,
       "writesTotal": 7,
       "legitimate": {
         "total": 16,
@@ -90,6 +98,10 @@
       },
       "restrictedValuesWrittenWider": 0,
       "writesWithoutSignoff": 2,
+      "writesSkippingRequiredSignoff": 0,
+      "routineUnsignedWrites": 2,
+      "writesHeld": 4,
+      "writesHeldThenApproved": 4,
       "writesTotal": 6,
       "legitimate": {
         "total": 16,

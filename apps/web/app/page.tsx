@@ -15,6 +15,8 @@ interface Cell {
   writtenWider: number;
   unsignedWrites: number;
   signedWrites: number;
+  skippedSignoff: number;
+  routineWrites: number;
   returned: number;
   approval: string | null;
 }
@@ -45,10 +47,10 @@ function totals(steps: Step[], k: TargetKey) {
       items: t.items + s.cells[k].items,
       beyondUser: t.beyondUser + s.cells[k].beyondUser,
       wider: t.wider + s.cells[k].writtenWider,
-      unsigned: t.unsigned + s.cells[k].unsignedWrites,
+      skipped: t.skipped + s.cells[k].skippedSignoff,
       held: t.held + (s.cells[k].decision === "held" ? 1 : 0),
     }),
-    { items: 0, beyondUser: 0, wider: 0, unsigned: 0, held: 0 },
+    { items: 0, beyondUser: 0, wider: 0, skipped: 0, held: 0 },
   );
 }
 
@@ -71,7 +73,7 @@ function outcome(c: Cell, k: TargetKey, bundle: string, tool: string): { text: s
   }
   if (c.unsignedWrites > 0) {
     if (c.writtenWider > 0) return { text: `wrote ${c.writtenWider} discount floors into a ticket support reads`, tone: "bad" };
-    if (k === "gateway") return { text: `write ran: the ${bundle} bundle needs no approval for it`, tone: "warn" };
+    if (c.routineWrites > 0) return { text: `routine write: the ${bundle} bundle needs no sign-off for it`, tone: "muted" };
     return { text: "write ran, nobody signed off", tone: "warn" };
   }
   if (c.items > 0) return { text: `${got}, ${plural(c.items, "item", "items")} outside the team's scope`, tone: "bad" };
@@ -115,7 +117,7 @@ function Column({ k, title, subtitle, replay, shown, persona }: {
         suffix="tokens"
         bad={replay.toolCounts[k][persona]! > 20}
       />
-      <Counter label="Writes that ran with no sign-off" value={t.unsigned} bad={t.unsigned > 0} warn />
+      <Counter label="Writes that skipped a required sign-off" value={t.skipped} bad={t.skipped > 0} warn />
       <ol className="mt-3 space-y-1.5 font-mono text-[12px] leading-snug">
         {recent.map((s, i) => {
           const o = outcome(s.cells[k], k, replay.personas[s.persona]!.bundle, s.tool);
@@ -143,7 +145,7 @@ function Muted({ replay, shown, persona }: { replay: Replay; shown: Step[]; pers
         <div><dt>beyond what the user could see at all</dt><dd className="font-mono text-xl text-stone-700">{t.beyondUser}</dd></div>
         <div><dt>restricted values written wider</dt><dd className="font-mono text-xl text-stone-700">{t.wider}</dd></div>
         <div><dt>tool-schema tokens</dt><dd className="font-mono text-xl text-stone-700">{replay.tokens.service[persona]!.toLocaleString("en-US")}</dd></div>
-        <div><dt>writes with no sign-off</dt><dd className="font-mono text-xl text-stone-700">{t.unsigned}</dd></div>
+        <div><dt>writes that skipped a required sign-off</dt><dd className="font-mono text-xl text-stone-700">{t.skipped}</dd></div>
       </dl>
     </section>
   );
