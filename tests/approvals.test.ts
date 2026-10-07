@@ -41,7 +41,7 @@ describe("approvals", () => {
   it("two approvals at once run the write once", () => withGateway("gh_test_ap_double", "enforce", async (g, stack) => {
     const held = await g.call(P.rep, "emea-sales", "crm_close_opportunity", { id: repOpps[0]!.id });
     const results = await Promise.all([approve(opts(stack), held.approvalId!, P.approver), approve(opts(stack), held.approvalId!, P.approver)]);
-    expect(results.filter((r) => r.status === "executed").length).toBe(1);
+    expect(results.filter((r) => r.ran).length).toBe(1);
     expect(await count(stack, "select count(*)::int as n from public.write_log")).toBe(1);
   }));
 

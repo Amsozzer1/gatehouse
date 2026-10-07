@@ -35,12 +35,13 @@ async function checkApprover(opts: ExecutorOptions, row: ApprovalRow, approverPe
   }
 }
 
-export async function approve(opts: ExecutorOptions, id: number, approverPersonId: number): Promise<{ status: string; result?: unknown }> {
+/** `ran` is true only for the call that claimed the approval and ran the write. */
+export async function approve(opts: ExecutorOptions, id: number, approverPersonId: number): Promise<{ status: string; ran: boolean; result?: unknown }> {
   const row = await load(opts.db, id);
   await checkApprover(opts, row, approverPersonId);
   const claimed = await opts.db.query(
     "update gateway.approvals set status = 'approved', approver_person_id = $2 where id = $1 and status = 'pending' returning id", [id, approverPersonId]);
-  if (claimed.rowCount !== 1) return { status: (await load(opts.db, id)).status };
+  if (claimed.rowCount !== 1) return { status: (await load(opts.db, id)).status, ran: false };
 
   const client = await connectClient(opts.upstreams[row.system], {
     authorization: `Bearer ${await upstreamToken(opts.db, row.requester_person_id, row.system)}`,
@@ -52,7 +53,7 @@ export async function approve(opts: ExecutorOptions, id: number, approverPersonI
     const status = out.ok ? "executed" : "failed";
     await opts.db.query("update gateway.approvals set status = $2, result = $3 where id = $1",
       [id, status, JSON.stringify(out.ok ? out.data : { error: out.error })]);
-    return { status, result: out.ok ? out.data : out.error };
+    return { status, ran: true, result: out.ok ? out.data : out.error };
   } finally {
     await client.close();
   }
