@@ -1,6 +1,6 @@
 // The gateway. One MCP endpoint per team bundle (/mcp/<bundle>). For each call it:
 //   1. rejects tools outside the bundle,
-//   2. pins enforced params (region, limit, fields) so the source returns only the team's scope,
+//   2. pins params (region, limit, fields) so the source returns only the team's scope,
 //   3. for writes that need approval: dry-runs as the user, then holds the call,
 //   4. otherwise calls the source as the actual user,
 //   5. writes one audit row.
@@ -31,8 +31,8 @@ export interface Gateway extends RunningServer {
 
 const systemOf = (tool: string): "crm" | "tickets" => (tool.startsWith("crm_") ? "crm" : "tickets");
 
-/** Pins the bundle's enforced params. Returns the new args and what changed. */
-export function applyEnforced(bundle: BundlePolicy, tool: string, args: Json): { args: Json; reasons: string[] } {
+/** Pins the bundle's scope params. Returns the new args and what changed. */
+export function pinParams(bundle: BundlePolicy, tool: string, args: Json): { args: Json; reasons: string[] } {
   const def = toolByName(tool);
   const props = ((def?.inputSchema.properties ?? {}) as Json);
   const out: Json = { ...args };
@@ -147,8 +147,8 @@ export async function startGateway(opts: GatewayOptions): Promise<Gateway> {
         decision = "would-deny";
       }
 
-      // 2. Enforced params.
-      const enforced = applyEnforced(bundle, tool, before);
+      // 2. Pinned params.
+      const enforced = pinParams(bundle, tool, before);
       reasons.push(...enforced.reasons);
       if (enforced.reasons.length > 0 && decision === "allowed") decision = mode === "enforce" ? "clamped" : "would-clamp";
       const sent = mode === "enforce" ? enforced.args : before;
