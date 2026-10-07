@@ -14,7 +14,7 @@ Planning docs live in `.private/` (gitignored): `PRD.md` is the spec to build, `
 - Run the systems and gateway locally on fixed ports: `pnpm stack [--observe]`
 - Approve or reject a held write on that stack: `pnpm approve <id> --as <person>`, `pnpm reject <id> --as <person>`
 - Run the demo: `[command]`
-- Measure / regenerate results: `[command]`
+- Measure / regenerate results: `pnpm measure` (writes `results/`, `results/numbers.md` and the generated parts of the README); `pnpm measure --check` fails if any deterministic number changed
 
 ## How to work
 - Build milestone by milestone from `.private/PRD.md`. Don't skip acceptance checks.
