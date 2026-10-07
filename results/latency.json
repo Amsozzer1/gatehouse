@@ -1,0 +1,58 @@
+{
+  "call": "crm_get_account as the EMEA rep",
+  "machine": {
+    "platform": "darwin 25.6.0",
+    "cpu": "Apple M4",
+    "cores": 10,
+    "memoryGb": 16,
+    "node": "v24.21.0"
+  },
+  "warmup": 100,
+  "callsPerRun": 1000,
+  "runs": 5,
+  "aggregate": {
+    "directMedianMs": 0.32,
+    "gatewayMedianMs": 0.62,
+    "directP95Ms": 0.47,
+    "gatewayP95Ms": 1.09,
+    "addedMedianMs": 0.3,
+    "addedP95Ms": 0.62
+  },
+  "perRun": [
+    {
+      "run": 1,
+      "directMedian": 0.39,
+      "gatewayMedian": 0.73,
+      "directP95": 0.61,
+      "gatewayP95": 1.46
+    },
+    {
+      "run": 2,
+      "directMedian": 0.33,
+      "gatewayMedian": 0.64,
+      "directP95": 0.42,
+      "gatewayP95": 1.1
+    },
+    {
+      "run": 3,
+      "directMedian": 0.33,
+      "gatewayMedian": 0.63,
+      "directP95": 0.4,
+      "gatewayP95": 0.97
+    },
+    {
+      "run": 4,
+      "directMedian": 0.3,
+      "gatewayMedian": 0.63,
+      "directP95": 0.33,
+      "gatewayP95": 1.1
+    },
+    {
+      "run": 5,
+      "directMedian": 0.3,
+      "gatewayMedian": 0.55,
+      "directP95": 0.34,
+      "gatewayP95": 0.65
+    }
+  ]
+}
