@@ -1,5 +1,5 @@
-# Private planning: names the target company. Never commit.
-.private/
+# Local-only instructions for the coding assistant
+CLAUDE.local.md
 
 # Video work lives outside the repo
 footage/
