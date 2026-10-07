@@ -81,6 +81,7 @@ const deterministic = {
     legitimate: runs[k].summary.legitimate,
     decisions: runs[k].summary.decisions,
     toolTokens: runs[k].tokens,
+    toolCounts: runs[k].toolCounts,
   }])),
   observe: { rollout, decisions: runs.observe.summary.decisions, itemsOutsideScope: runs.observe.summary.itemsOutsideScope },
   gatewayCostOfScoping: runs.gateway.results
@@ -135,7 +136,8 @@ writeFileSync(new URL("replay.json", out), `${JSON.stringify(replay, null, 2)}\n
 writeFileSync(new URL("../apps/web/public/replay.json", import.meta.url), `${JSON.stringify(replay)}\n`);
 
 const optional = (name: string) => (existsSync(new URL(name, out)) ? JSON.parse(readFileSync(new URL(name, out), "utf8")) : undefined);
-writeFileSync(new URL("numbers.md", out), renderNumbers(deterministic, { seeds: optional("seeds.json"), latency: optional("latency.json") }));
+const extra = { seeds: optional("seeds.json"), latency: optional("latency.json") };
+writeFileSync(new URL("numbers.md", out), renderNumbers(deterministic, extra));
 const readmeUrl = new URL("../README.md", import.meta.url);
-writeFileSync(readmeUrl, renderReadme(readFileSync(readmeUrl, "utf8"), deterministic, replay));
+writeFileSync(readmeUrl, renderReadme(readFileSync(readmeUrl, "utf8"), deterministic, replay, extra));
 console.log(JSON.stringify(deterministic.targets, null, 2));

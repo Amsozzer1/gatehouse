@@ -10,6 +10,7 @@ interface TargetNumbers {
   legitimate: { total: number; served: number; notServed: { step: string; reason: string }[] };
   decisions: Record<string, number>;
   toolTokens: Record<string, number>;
+  toolCounts: Record<string, number>;
 }
 
 export interface Deterministic {
@@ -22,7 +23,8 @@ export interface Deterministic {
 }
 
 interface Replay {
-  steps: { cells: Record<string, { decision: string; signedWrites: number; unsignedWrites: number }> }[];
+  personas: Record<string, { bundle: string }>;
+  steps: { persona: string; tool: string; cells: Record<string, { decision: string; signedWrites: number; unsignedWrites: number }> }[];
 }
 
 const LABELS: Record<string, string> = {
@@ -49,26 +51,64 @@ export function caption(d: Deterministic, replay: Replay): string {
   const g = d.targets.gateway!;
   const held = replay.steps.filter((x) => x.cells.gateway!.decision === "held").length;
   const heldApproved = replay.steps.filter((x) => x.cells.gateway!.decision === "held" && x.cells.gateway!.signedWrites > 0).length;
+  const unsignedBundles = [...new Set(replay.steps.filter((x) => x.cells.gateway!.unsignedWrites > 0).map((x) => replay.personas[x.persona]!.bundle))];
+  const unsignedNote = g.writesWithoutSignoff === 0 ? ""
+    : `; the ${g.writesWithoutSignoff} unsigned ${g.writesWithoutSignoff === 1 ? "write is" : "writes are"} from the ${unsignedBundles.join(" and ")} `
+      + `${unsignedBundles.length === 1 ? "bundle, whose" : "bundles, whose"} policy doesn't require sign-off for them`;
   return [
     `*Paced replay of one scripted session (${d.steps} tool calls, no LLM; the systems and data are fake). `,
     `Middle: the agent uses each person's own token. ${u.itemsOutsideScope} items outside the EMEA team's scope reach it, `,
     `${u.restrictedValuesWrittenWider} discount floors end up in a ticket comment that support can read, and ${u.writesWithoutSignoff} writes run with no sign-off. `,
     `Right: the same calls through the gateway. ${g.itemsOutsideScope} items outside the scope, ${g.restrictedValuesWrittenWider} restricted values written, `,
-    `${held} writes held and ${heldApproved} of them approved by the EMEA lead; the ${g.writesWithoutSignoff} unsigned writes are the support team's own `,
-    `comment and status change, which its policy allows. Left, muted: a shared service account, ${s.itemsOutsideScope} items, `,
+    `${held} writes held and ${heldApproved} of them approved by the EMEA lead${unsignedNote}. `,
+    `Left, muted: a shared service account, ${s.itemsOutsideScope} items, `,
     `${s.exposure.beyondUser} of them beyond what the user could see at all.*`,
   ].join("");
 }
 
-function replaceBetween(text: string, name: string, body: string): string {
+function replaceBetween(text: string, name: string, body: string, inline = false): string {
   const re = new RegExp(`(<!-- ${name}:start -->)[\\s\\S]*?(<!-- ${name}:end -->)`);
   if (!re.test(text)) return text;
-  return text.replace(re, `$1\n${body}\n$2`);
+  return text.replace(re, inline ? `$1${body}$2` : `$1\n${body}\n$2`);
 }
 
-export function renderReadme(readme: string, d: Deterministic, replay: Replay): string {
+export function summaryParagraph(d: Deterministic, opt: Optional): string {
+  const g = d.targets.gateway!;
+  const parts: string[] = [];
+  parts.push(`What the gateway costs: ${d.gatewayCostOfScoping.length} of the ${g.legitimate.total} legitimate calls had something pinned or held `
+    + `(region pinned, row limit clamped, fields removed, or a write held for sign-off), and ${g.legitimate.served} of ${g.legitimate.total} still got everything `
+    + `the task needed, checked against what the oracle says each task needs.`);
+  if (opt.seeds) {
+    const xs = (k: string) => opt.seeds!.filter((r) => r.target === k);
+    const range = (v: number[]) => (Math.min(...v) === Math.max(...v) ? `${v[0]}` : `${Math.min(...v)} to ${Math.max(...v)}`);
+    parts.push(`Seeds 1 to 5 give the same picture: per-user tokens leave ${range(xs("user").map((r) => r.itemsOutsideScope))} items outside the team's scope `
+      + `and write ${range(xs("user").map((r) => r.restrictedValuesWrittenWider))} restricted values wider; the gateway leaves `
+      + `${range(xs("gateway").map((r) => r.itemsOutsideScope))} and ${range(xs("gateway").map((r) => r.restrictedValuesWrittenWider))}, and serves `
+      + `${range(xs("gateway").map((r) => r.legitimateServed))} of ${xs("gateway")[0]!.legitimateTotal} legitimate tasks on every seed.`);
+  }
+  if (opt.latency) {
+    const a = opt.latency.aggregate;
+    parts.push(`The gateway hop adds ${a.addedMedianMs} ms at the median and ${a.addedP95Ms} ms at p95 to one read call `
+      + `(${a.directMedianMs} ms direct vs ${a.gatewayMedianMs} ms through the gateway; ${opt.latency.runs} runs of ${opt.latency.callsPerRun} calls, one machine, loopback).`);
+  }
+  return parts.join("\n\n");
+}
+
+export function rolloutSentence(d: Deterministic, bundle = "emea-sales"): string {
+  const n = (decision: string, reason: string) =>
+    d.observe.rollout.filter((r) => r.bundle === bundle && r.decision === decision && r.reason === reason).reduce((s, r) => s + r.n, 0);
+  const calls = (x: number) => `${x} ${x === 1 ? "call" : "calls"}`;
+  return `for the EMEA sales agent in this session: ${calls(n("would-deny", "not-in-bundle"))} to a tool outside the bundle, `
+    + `${calls(n("would-clamp", "pinned:region"))} pinned to EMEA, ${calls(n("would-clamp", "restricted:fields"))} with fields removed, `
+    + `${calls(n("would-clamp", "clamped:limit"))} with the row limit clamped, ${calls(n("would-hold", "approval-required"))} that would wait for sign-off, `
+    + `and ${calls(n("would-deny", "source-denied"))} the CRM would refuse anyway`;
+}
+
+export function renderReadme(readme: string, d: Deterministic, replay: Replay, opt: Optional = {}): string {
   let out = replaceBetween(readme, "results", resultsTable(d));
   out = replaceBetween(out, "caption", caption(d, replay));
+  out = replaceBetween(out, "summary", summaryParagraph(d, opt));
+  out = replaceBetween(out, "rollout", rolloutSentence(d), true);
   return out;
 }
 
@@ -94,6 +134,7 @@ export function renderNumbers(d: Deterministic, opt: Optional = {}): string {
     rows.push(line(`${t.legitimate.served} of ${t.legitimate.total}`, `Legitimate tasks fully served, ${who}`, raw));
     for (const [persona, n] of Object.entries(t.toolTokens)) {
       rows.push(line(n, `Tool-schema tokens (js-tiktoken cl100k, a proxy) in the ${persona} persona's context, ${who}`, "`results/summary.json`"));
+      rows.push(line(t.toolCounts[persona]!, `Tools listed to the ${persona} persona's agent, ${who}`, "`results/summary.json`"));
     }
   }
   for (const r of d.observe.rollout) {

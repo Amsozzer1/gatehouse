@@ -36,6 +36,11 @@
         "rep": 3843,
         "manager": 3843,
         "support": 3843
+      },
+      "toolCounts": {
+        "rep": 40,
+        "manager": 40,
+        "support": 40
       }
     },
     "user": {
@@ -67,6 +72,11 @@
         "rep": 3843,
         "manager": 3843,
         "support": 3843
+      },
+      "toolCounts": {
+        "rep": 40,
+        "manager": 40,
+        "support": 40
       }
     },
     "gateway": {
@@ -96,6 +106,11 @@
         "rep": 1774,
         "manager": 1774,
         "support": 974
+      },
+      "toolCounts": {
+        "rep": 14,
+        "manager": 14,
+        "support": 9
       }
     }
   },
