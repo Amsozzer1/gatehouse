@@ -11,6 +11,8 @@ Planning docs live in `.private/` (gitignored): `PRD.md` is the spec to build, `
 - Seed the template database: `pnpm seed`
 - Test: `pnpm test`
 - Replay the session against one target: `pnpm trace --target service|user|gateway [--observe]`
+- Run the systems and gateway locally on fixed ports: `pnpm stack [--observe]`
+- Approve or reject a held write on that stack: `pnpm approve <id> --as <person>`, `pnpm reject <id> --as <person>`
 - Run the demo: `[command]`
 - Measure / regenerate results: `[command]`
 
