@@ -12,7 +12,10 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "seed": "tsx scripts/seed.ts",
-    "trace": "tsx packages/runner/src/cli.ts"
+    "trace": "tsx packages/runner/src/cli.ts",
+    "stack": "tsx scripts/stack.ts",
+    "approve": "tsx packages/gateway/src/cli.ts approve",
+    "reject": "tsx packages/gateway/src/cli.ts reject"
   },
   "devDependencies": {
     "@types/node": "24.19.1",
