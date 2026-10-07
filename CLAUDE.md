@@ -8,6 +8,7 @@ Planning docs live in `.private/` (gitignored): `PRD.md` is the spec to build, `
 ## Commands
 - Database: `docker compose up -d` (Postgres 15.13 on port 54329)
 - Build: `pnpm install && pnpm typecheck`
+- Seed the template database: `pnpm seed`
 - Test: `pnpm test`
 - Run the demo: `[command]`
 - Measure / regenerate results: `[command]`
