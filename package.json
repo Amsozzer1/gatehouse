@@ -15,7 +15,8 @@
     "trace": "tsx packages/runner/src/cli.ts",
     "stack": "tsx scripts/stack.ts",
     "approve": "tsx packages/gateway/src/cli.ts approve",
-    "reject": "tsx packages/gateway/src/cli.ts reject"
+    "reject": "tsx packages/gateway/src/cli.ts reject",
+    "measure": "tsx scripts/measure.ts"
   },
   "devDependencies": {
     "@types/node": "24.19.1",

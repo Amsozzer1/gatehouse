@@ -1,0 +1,252 @@
+{
+  "seed": 42,
+  "steps": 20,
+  "catalogTools": 40,
+  "targets": {
+    "service": {
+      "itemsOutsideScope": 304,
+      "exposure": {
+        "rows": 146,
+        "fields": 64,
+        "aggregateInputs": 94,
+        "beyondUser": 167,
+        "viaToolsOutsideBundle": 50
+      },
+      "restrictedValuesWrittenWider": 6,
+      "writesWithoutSignoff": 8,
+      "writesTotal": 8,
+      "legitimate": {
+        "total": 16,
+        "served": 14,
+        "notServed": [
+          {
+            "step": "rep-summary",
+            "reason": "aggregate differs from what the task needs"
+          },
+          {
+            "step": "manager-summary",
+            "reason": "aggregate differs from what the task needs"
+          }
+        ]
+      },
+      "decisions": {
+        "direct": 20
+      },
+      "toolTokens": {
+        "rep": 3843,
+        "manager": 3843,
+        "support": 3843
+      }
+    },
+    "user": {
+      "itemsOutsideScope": 137,
+      "exposure": {
+        "rows": 48,
+        "fields": 42,
+        "aggregateInputs": 47,
+        "beyondUser": 0,
+        "viaToolsOutsideBundle": 0
+      },
+      "restrictedValuesWrittenWider": 6,
+      "writesWithoutSignoff": 7,
+      "writesTotal": 7,
+      "legitimate": {
+        "total": 16,
+        "served": 15,
+        "notServed": [
+          {
+            "step": "manager-summary",
+            "reason": "aggregate differs from what the task needs"
+          }
+        ]
+      },
+      "decisions": {
+        "direct": 20
+      },
+      "toolTokens": {
+        "rep": 3843,
+        "manager": 3843,
+        "support": 3843
+      }
+    },
+    "gateway": {
+      "itemsOutsideScope": 0,
+      "exposure": {
+        "rows": 0,
+        "fields": 0,
+        "aggregateInputs": 0,
+        "beyondUser": 0,
+        "viaToolsOutsideBundle": 0
+      },
+      "restrictedValuesWrittenWider": 0,
+      "writesWithoutSignoff": 2,
+      "writesTotal": 6,
+      "legitimate": {
+        "total": 16,
+        "served": 16,
+        "notServed": []
+      },
+      "decisions": {
+        "clamped": 9,
+        "held": 4,
+        "denied": 3,
+        "allowed": 4
+      },
+      "toolTokens": {
+        "rep": 1774,
+        "manager": 1774,
+        "support": 974
+      }
+    }
+  },
+  "observe": {
+    "rollout": [
+      {
+        "bundle": "emea-sales",
+        "decision": "would-clamp",
+        "reason": "clamped:limit",
+        "n": 1
+      },
+      {
+        "bundle": "emea-sales",
+        "decision": "would-clamp",
+        "reason": "pinned:region",
+        "n": 8
+      },
+      {
+        "bundle": "emea-sales",
+        "decision": "would-clamp",
+        "reason": "restricted:fields",
+        "n": 5
+      },
+      {
+        "bundle": "emea-sales",
+        "decision": "would-deny",
+        "reason": "not-in-bundle",
+        "n": 1
+      },
+      {
+        "bundle": "emea-sales",
+        "decision": "would-hold",
+        "reason": "approval-required",
+        "n": 4
+      },
+      {
+        "bundle": "support",
+        "decision": "would-clamp",
+        "reason": "restricted:fields",
+        "n": 1
+      },
+      {
+        "bundle": "support",
+        "decision": "would-deny",
+        "reason": "not-in-bundle",
+        "n": 1
+      },
+      {
+        "bundle": "emea-sales",
+        "decision": "would-deny",
+        "reason": "source-denied",
+        "n": 1
+      }
+    ],
+    "decisions": {
+      "would-clamp": 9,
+      "would-hold": 4,
+      "would-deny": 3,
+      "allowed": 4
+    },
+    "itemsOutsideScope": 137
+  },
+  "gatewayCostOfScoping": [
+    {
+      "step": "rep-pipeline",
+      "decision": "clamped",
+      "reasons": [
+        "pinned:region",
+        "restricted:fields"
+      ]
+    },
+    {
+      "step": "rep-summary",
+      "decision": "clamped",
+      "reasons": [
+        "pinned:region",
+        "restricted:fields"
+      ]
+    },
+    {
+      "step": "rep-accounts",
+      "decision": "clamped",
+      "reasons": [
+        "pinned:region"
+      ]
+    },
+    {
+      "step": "rep-activity",
+      "decision": "clamped",
+      "reasons": [
+        "pinned:region"
+      ]
+    },
+    {
+      "step": "rep-close-1",
+      "decision": "held",
+      "reasons": [
+        "approval-required"
+      ]
+    },
+    {
+      "step": "rep-close-2",
+      "decision": "held",
+      "reasons": [
+        "approval-required"
+      ]
+    },
+    {
+      "step": "rep-escalation-status",
+      "decision": "held",
+      "reasons": [
+        "approval-required"
+      ]
+    },
+    {
+      "step": "manager-summary",
+      "decision": "clamped",
+      "reasons": [
+        "pinned:region",
+        "restricted:fields"
+      ]
+    },
+    {
+      "step": "manager-deals",
+      "decision": "clamped",
+      "reasons": [
+        "pinned:region",
+        "clamped:limit",
+        "restricted:fields"
+      ]
+    },
+    {
+      "step": "manager-comment",
+      "decision": "held",
+      "reasons": [
+        "approval-required"
+      ]
+    },
+    {
+      "step": "support-account",
+      "decision": "clamped",
+      "reasons": [
+        "restricted:fields"
+      ]
+    },
+    {
+      "step": "rep-account",
+      "decision": "clamped",
+      "reasons": [
+        "pinned:region"
+      ]
+    }
+  ]
+}
