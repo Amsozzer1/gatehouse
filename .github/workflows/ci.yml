@@ -8,14 +8,33 @@ on:
 jobs:
   build:
     runs-on: ubuntu-24.04
+    services:
+      # Same image tag as docker-compose.yml.
+      postgres:
+        image: postgres:15.13-alpine
+        env:
+          POSTGRES_USER: gatehouse
+          POSTGRES_PASSWORD: gatehouse
+          POSTGRES_DB: gatehouse
+        ports:
+          - 54329:5432
+        options: >-
+          --health-cmd "pg_isready -U gatehouse"
+          --health-interval 2s
+          --health-timeout 2s
+          --health-retries 30
+    env:
+      DATABASE_URL: postgres://gatehouse:gatehouse@localhost:54329/gatehouse
     steps:
       - uses: actions/checkout@v4
-      # Replace with the project's toolchain setup, build and test commands.
-      # TEMPLATE.md only exists in the template repo (setup.sh deletes it), so the
-      # template itself passes and a new project fails until it sets real commands.
-      - run: |
-          if [ -f TEMPLATE.md ]; then echo "template repo, nothing to build"; exit 0; fi
-          echo "set build and test commands"; exit 1
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm test
 
   leak-check:
     runs-on: ubuntu-24.04
