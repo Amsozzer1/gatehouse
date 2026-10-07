@@ -35,6 +35,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
       - run: pnpm test
+      # Re-measure and fail if any deterministic number differs from the committed results.
+      - run: pnpm measure --check
 
   leak-check:
     runs-on: ubuntu-24.04
