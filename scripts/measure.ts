@@ -26,7 +26,7 @@ const enc = getEncoding("cl100k_base");
 await createTemplate(world);
 
 type RunKey = "service" | "user" | "gateway" | "observe";
-const runs: Record<RunKey, { summary: RunSummary; results: StepResult[]; tokens: Record<string, number> }> = {} as never;
+const runs: Record<RunKey, { summary: RunSummary; results: StepResult[]; tokens: Record<string, number>; toolCounts: Record<string, number> }> = {} as never;
 let rollout: { bundle: string; decision: string; reason: string; n: number }[] = [];
 
 for (const key of ["service", "user", "gateway", "observe"] as const) {
@@ -44,11 +44,13 @@ for (const key of ["service", "user", "gateway", "observe"] as const) {
     const results = await runTrace({ target, world, trace, policy, db: stack.db, ...(approve ? { approve } : {}) });
     const name: TargetName = key === "observe" ? "gateway" : key;
     const tokens: Record<string, number> = {};
+    const toolCounts: Record<string, number> = {};
     for (const [persona, p] of Object.entries(trace.personas)) {
       const tools = await target.listTools((world.personas as Record<string, number>)[persona]!, p.bundle);
       tokens[persona] = enc.encode(JSON.stringify(tools)).length;
+      toolCounts[persona] = tools.length;
     }
-    runs[key] = { summary: summarize(name, results), results, tokens };
+    runs[key] = { summary: summarize(name, results), results, tokens, toolCounts };
     if (key === "observe") {
       const r = await stack.db.query<{ bundle: string; decision: string; reason: string; n: number }>(
         `select bundle, decision, reason, count(*)::int as n
@@ -110,6 +112,7 @@ const replay = {
   seed: SEED,
   personas: trace.personas,
   tokens: { service: runs.service.tokens, user: runs.user.tokens, gateway: runs.gateway.tokens },
+  toolCounts: { service: runs.service.toolCounts, user: runs.user.toolCounts, gateway: runs.gateway.toolCounts },
   steps: trace.steps.map((s, i) => ({
     id: s.id, persona: s.persona, say: s.say, tool: s.tool, label: s.label,
     cells: Object.fromEntries((["service", "user", "gateway"] as const).map((k) => {

@@ -31,6 +31,23 @@
       "support": 974
     }
   },
+  "toolCounts": {
+    "service": {
+      "rep": 40,
+      "manager": 40,
+      "support": 40
+    },
+    "user": {
+      "rep": 40,
+      "manager": 40,
+      "support": 40
+    },
+    "gateway": {
+      "rep": 14,
+      "manager": 14,
+      "support": 9
+    }
+  },
   "steps": [
     {
       "id": "rep-pipeline",
