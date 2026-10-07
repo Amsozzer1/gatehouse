@@ -134,7 +134,8 @@ mkdirSync(new URL("../apps/web/public/", import.meta.url), { recursive: true });
 writeFileSync(new URL("replay.json", out), `${JSON.stringify(replay, null, 2)}\n`);
 writeFileSync(new URL("../apps/web/public/replay.json", import.meta.url), `${JSON.stringify(replay)}\n`);
 
-writeFileSync(new URL("numbers.md", out), renderNumbers(deterministic));
+const optional = (name: string) => (existsSync(new URL(name, out)) ? JSON.parse(readFileSync(new URL(name, out), "utf8")) : undefined);
+writeFileSync(new URL("numbers.md", out), renderNumbers(deterministic, { seeds: optional("seeds.json"), latency: optional("latency.json") }));
 const readmeUrl = new URL("../README.md", import.meta.url);
 writeFileSync(readmeUrl, renderReadme(readFileSync(readmeUrl, "utf8"), deterministic, replay));
 console.log(JSON.stringify(deterministic.targets, null, 2));

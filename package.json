@@ -18,7 +18,9 @@
     "reject": "tsx packages/gateway/src/cli.ts reject",
     "measure": "tsx scripts/measure.ts",
     "dev": "pnpm --filter web dev",
-    "record": "pnpm --filter web build && tsx scripts/record-gif.ts"
+    "record": "pnpm --filter web build && tsx scripts/record-gif.ts",
+    "seeds": "tsx scripts/seeds.ts",
+    "latency": "tsx scripts/latency.ts"
   },
   "devDependencies": {
     "@types/node": "24.19.1",

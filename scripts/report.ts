@@ -72,7 +72,12 @@ export function renderReadme(readme: string, d: Deterministic, replay: Replay): 
   return out;
 }
 
-export function renderNumbers(d: Deterministic): string {
+export interface Optional {
+  seeds?: { seed: number; target: string; itemsOutsideScope: number; beyondUser: number; restrictedValuesWrittenWider: number; writesWithoutSignoff: number; writesTotal: number; legitimateServed: number; legitimateTotal: number }[];
+  latency?: { warmup: number; callsPerRun: number; runs: number; machine: { cpu: string; cores: number; memoryGb: number; platform: string; node: string }; aggregate: Record<string, number> };
+}
+
+export function renderNumbers(d: Deterministic, opt: Optional = {}): string {
   const src = "`pnpm measure` (`scripts/measure.ts`)";
   const line = (n: string | number, what: string, raw: string) =>
     `| ${n} | ${what} | Single run, deterministic | Seed ${d.seed}, 1 run per target | ${src} | ${raw} |`;
@@ -94,11 +99,38 @@ export function renderNumbers(d: Deterministic): string {
   for (const r of d.observe.rollout) {
     rows.push(line(r.n, `Observe mode, ${r.bundle}: ${r.decision} (${r.reason})`, "`results/run-observe.jsonl`, `results/summary.json`"));
   }
+  if (opt.seeds) {
+    for (const k of ["service", "user", "gateway"]) {
+      const xs = opt.seeds.filter((r) => r.target === k);
+      const range = (f: (r: (typeof xs)[number]) => number) => {
+        const v = xs.map(f);
+        return Math.min(...v) === Math.max(...v) ? `${v[0]}` : `${Math.min(...v)} to ${Math.max(...v)}`;
+      };
+      const raw = "`results/seeds.json`";
+      const src2 = "`pnpm seeds` (`scripts/seeds.ts`)";
+      const agg = (n: string, what: string) => `| ${n} | ${what} | Range over 5 single runs, each deterministic | Seeds 1-5, 1 run per seed | ${src2} | ${raw} |`;
+      rows.push(agg(range((r) => r.itemsOutsideScope), `Items outside the team agent's scope, ${k}, across seeds`));
+      rows.push(agg(range((r) => r.restrictedValuesWrittenWider), `Restricted values written wider, ${k}, across seeds`));
+      rows.push(agg(range((r) => r.writesWithoutSignoff), `Writes without sign-off, ${k}, across seeds`));
+      rows.push(agg(range((r) => r.legitimateServed), `Legitimate tasks fully served (of ${xs[0]!.legitimateTotal}), ${k}, across seeds`));
+    }
+  }
+  if (opt.latency) {
+    const l = opt.latency;
+    const m = `${l.machine.cpu}, ${l.machine.cores} cores, ${l.machine.memoryGb} GB, ${l.machine.platform}, Node ${l.machine.node}`;
+    const lat = (n: number, what: string) =>
+      `| ${n} ms | ${what} | Aggregate over all ${l.runs * l.callsPerRun} timed calls | ${l.runs} runs x ${l.callsPerRun} calls after ${l.warmup} warm-up calls, seed ${d.seed}, ${m} | \`pnpm latency\` (\`scripts/latency.ts\`) | \`results/latency.json\` |`;
+    rows.push(lat(l.aggregate.directMedianMs!, "Median wall-clock time of one read call, per-user token straight to the CRM"));
+    rows.push(lat(l.aggregate.gatewayMedianMs!, "Median wall-clock time of the same call through the gateway (audit insert included)"));
+    rows.push(lat(l.aggregate.addedMedianMs!, "Added median latency of the gateway hop (difference of the two medians)"));
+    rows.push(lat(l.aggregate.addedP95Ms!, "Added p95 latency of the gateway hop (difference of the two p95s)"));
+  }
   return [
     "# Numbers",
     "",
     "Every number that appears in the README, and where it comes from. All of them are produced by one command on",
-    `seed ${d.seed} and are deterministic: the same command gives the same numbers, which CI checks with \`pnpm measure --check\`.`,
+    `seed ${d.seed}. The counters are deterministic: the same command gives the same numbers, which CI checks with \`pnpm measure --check\`.`,
+    "The seed sweep is also deterministic. Latency is wall-clock time, so it is not deterministic and is not part of the CI check.",
     `The session has ${d.steps} tool calls; the mock systems expose ${d.catalogTools} tools in total.`,
     "",
     "| Number | What it measures | Single run or aggregate | Runs / seeds | Produced by | Raw output |",

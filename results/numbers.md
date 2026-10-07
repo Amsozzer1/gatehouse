@@ -1,7 +1,8 @@
 # Numbers
 
 Every number that appears in the README, and where it comes from. All of them are produced by one command on
-seed 42 and are deterministic: the same command gives the same numbers, which CI checks with `pnpm measure --check`.
+seed 42. The counters are deterministic: the same command gives the same numbers, which CI checks with `pnpm measure --check`.
+The seed sweep is also deterministic. Latency is wall-clock time, so it is not deterministic and is not part of the CI check.
 The session has 20 tool calls; the mock systems expose 40 tools in total.
 
 | Number | What it measures | Single run or aggregate | Runs / seeds | Produced by | Raw output |
@@ -41,3 +42,19 @@ The session has 20 tool calls; the mock systems expose 40 tools in total.
 | 1 | Observe mode, support: would-clamp (restricted:fields) | Single run, deterministic | Seed 42, 1 run per target | `pnpm measure` (`scripts/measure.ts`) | `results/run-observe.jsonl`, `results/summary.json` |
 | 1 | Observe mode, support: would-deny (not-in-bundle) | Single run, deterministic | Seed 42, 1 run per target | `pnpm measure` (`scripts/measure.ts`) | `results/run-observe.jsonl`, `results/summary.json` |
 | 1 | Observe mode, emea-sales: would-deny (source-denied) | Single run, deterministic | Seed 42, 1 run per target | `pnpm measure` (`scripts/measure.ts`) | `results/run-observe.jsonl`, `results/summary.json` |
+| 271 to 302 | Items outside the team agent's scope, service, across seeds | Range over 5 single runs, each deterministic | Seeds 1-5, 1 run per seed | `pnpm seeds` (`scripts/seeds.ts`) | `results/seeds.json` |
+| 6 | Restricted values written wider, service, across seeds | Range over 5 single runs, each deterministic | Seeds 1-5, 1 run per seed | `pnpm seeds` (`scripts/seeds.ts`) | `results/seeds.json` |
+| 8 | Writes without sign-off, service, across seeds | Range over 5 single runs, each deterministic | Seeds 1-5, 1 run per seed | `pnpm seeds` (`scripts/seeds.ts`) | `results/seeds.json` |
+| 14 | Legitimate tasks fully served (of 16), service, across seeds | Range over 5 single runs, each deterministic | Seeds 1-5, 1 run per seed | `pnpm seeds` (`scripts/seeds.ts`) | `results/seeds.json` |
+| 115 to 136 | Items outside the team agent's scope, user, across seeds | Range over 5 single runs, each deterministic | Seeds 1-5, 1 run per seed | `pnpm seeds` (`scripts/seeds.ts`) | `results/seeds.json` |
+| 6 | Restricted values written wider, user, across seeds | Range over 5 single runs, each deterministic | Seeds 1-5, 1 run per seed | `pnpm seeds` (`scripts/seeds.ts`) | `results/seeds.json` |
+| 7 | Writes without sign-off, user, across seeds | Range over 5 single runs, each deterministic | Seeds 1-5, 1 run per seed | `pnpm seeds` (`scripts/seeds.ts`) | `results/seeds.json` |
+| 15 | Legitimate tasks fully served (of 16), user, across seeds | Range over 5 single runs, each deterministic | Seeds 1-5, 1 run per seed | `pnpm seeds` (`scripts/seeds.ts`) | `results/seeds.json` |
+| 0 | Items outside the team agent's scope, gateway, across seeds | Range over 5 single runs, each deterministic | Seeds 1-5, 1 run per seed | `pnpm seeds` (`scripts/seeds.ts`) | `results/seeds.json` |
+| 0 | Restricted values written wider, gateway, across seeds | Range over 5 single runs, each deterministic | Seeds 1-5, 1 run per seed | `pnpm seeds` (`scripts/seeds.ts`) | `results/seeds.json` |
+| 2 | Writes without sign-off, gateway, across seeds | Range over 5 single runs, each deterministic | Seeds 1-5, 1 run per seed | `pnpm seeds` (`scripts/seeds.ts`) | `results/seeds.json` |
+| 16 | Legitimate tasks fully served (of 16), gateway, across seeds | Range over 5 single runs, each deterministic | Seeds 1-5, 1 run per seed | `pnpm seeds` (`scripts/seeds.ts`) | `results/seeds.json` |
+| 0.32 ms | Median wall-clock time of one read call, per-user token straight to the CRM | Aggregate over all 5000 timed calls | 5 runs x 1000 calls after 100 warm-up calls, seed 42, Apple M4, 10 cores, 16 GB, darwin 25.6.0, Node v24.21.0 | `pnpm latency` (`scripts/latency.ts`) | `results/latency.json` |
+| 0.62 ms | Median wall-clock time of the same call through the gateway (audit insert included) | Aggregate over all 5000 timed calls | 5 runs x 1000 calls after 100 warm-up calls, seed 42, Apple M4, 10 cores, 16 GB, darwin 25.6.0, Node v24.21.0 | `pnpm latency` (`scripts/latency.ts`) | `results/latency.json` |
+| 0.3 ms | Added median latency of the gateway hop (difference of the two medians) | Aggregate over all 5000 timed calls | 5 runs x 1000 calls after 100 warm-up calls, seed 42, Apple M4, 10 cores, 16 GB, darwin 25.6.0, Node v24.21.0 | `pnpm latency` (`scripts/latency.ts`) | `results/latency.json` |
+| 0.62 ms | Added p95 latency of the gateway hop (difference of the two p95s) | Aggregate over all 5000 timed calls | 5 runs x 1000 calls after 100 warm-up calls, seed 42, Apple M4, 10 cores, 16 GB, darwin 25.6.0, Node v24.21.0 | `pnpm latency` (`scripts/latency.ts`) | `results/latency.json` |
