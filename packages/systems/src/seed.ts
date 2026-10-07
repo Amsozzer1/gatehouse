@@ -71,6 +71,7 @@ create table gateway.identities (
   person_id int not null, system text not null, user_id int not null, token text not null,
   primary key (person_id, system)
 );
+create table gateway.groups (person_id int not null, name text not null, primary key (person_id, name));
 create table gateway.approvals (
   id int generated always as identity primary key,
   idem_key text not null, status text not null, bundle text not null,
@@ -123,6 +124,7 @@ export async function seedDatabase(client: pg.ClientBase, world: World): Promise
   await insertRows(client, "tickets.project_members", world.tickets.members);
   await insertRows(client, "tickets.tickets", world.tickets.tickets as unknown as Record<string, unknown>[]);
   await insertRows(client, "tickets.comments", world.tickets.comments as unknown as Record<string, unknown>[]);
+  await insertRows(client, "gateway.groups", Object.entries(world.groups).flatMap(([name, ids]) => ids.map((person_id) => ({ person_id, name }))));
   await insertRows(client, "gateway.identities", world.people.flatMap((p) => [
     { person_id: p.id, system: "crm", user_id: p.crmUserId, token: userToken("crm", p.crmUserId) },
     { person_id: p.id, system: "tickets", user_id: p.ticketsUserId, token: userToken("tickets", p.ticketsUserId) },

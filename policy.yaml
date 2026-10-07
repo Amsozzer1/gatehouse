@@ -1,0 +1,70 @@
+# Gateway policy: one bundle per team. A customer admin edits this file.
+#
+# scope    what the team's agent should be able to see. The measurement oracle reads
+#          only this block, to decide what counts as outside the team's scope.
+# enforce  the parameters the gateway pins on every call so the source returns only
+#          that scope. Declared separately on purpose: the oracle checks that these
+#          actually achieve the declared scope.
+# approvals  tools whose calls are held until someone in `approvers` signs off.
+
+bundles:
+  emea-sales:
+    description: Agent for the EMEA sales team.
+    members: [emea-sales]
+    approvers: [emea-sales-leads]
+    tools:
+      - crm_list_accounts
+      - crm_get_account
+      - crm_search_accounts
+      - crm_list_contacts
+      - crm_get_contact
+      - crm_list_opportunities
+      - crm_get_opportunity
+      - crm_search_opportunities
+      - crm_list_activities
+      - crm_pipeline_summary
+      - crm_update_opportunity
+      - crm_close_opportunity
+      - tickets_add_comment
+      - tickets_update_status
+    scope:
+      crm.accounts: { regions: [EMEA], fields: [id, name, region, owner_id, industry] }
+      crm.contacts: { regions: [EMEA], fields: [id, account_id, name, email, title, region, owner_id] }
+      crm.opportunities: { regions: [EMEA], fields: [id, account_id, name, region, owner_id, stage, amount, close_quarter] }
+      crm.activities: { regions: [EMEA], fields: [id, opportunity_id, subject, kind, region, owner_id] }
+      tickets.tickets: { fields: [id, project_id, title, status, priority] }
+      tickets.comments: { fields: [id, ticket_id, author_id, body] }
+    enforce:
+      region: EMEA
+      max_limit: 50
+      fields:
+        crm.opportunities: [id, account_id, name, region, owner_id, stage, amount, close_quarter]
+    approvals:
+      - crm_update_opportunity
+      - crm_close_opportunity
+      - tickets_add_comment
+      - tickets_update_status
+
+  support:
+    description: Agent for the support team.
+    members: [support]
+    approvers: []
+    tools:
+      - tickets_list_tickets
+      - tickets_get_ticket
+      - tickets_search_tickets
+      - tickets_list_comments
+      - tickets_get_comment
+      - tickets_add_comment
+      - tickets_update_status
+      - crm_get_account
+      - crm_search_accounts
+    scope:
+      tickets.tickets: { fields: [id, project_id, title, body, status, priority, reporter_id] }
+      tickets.comments: { fields: [id, ticket_id, author_id, body] }
+      crm.accounts: { regions: [EMEA, NA, APAC], fields: [id, name, region, industry] }
+    enforce:
+      max_limit: 50
+      fields:
+        crm.accounts: [id, name, region, industry]
+    approvals: []

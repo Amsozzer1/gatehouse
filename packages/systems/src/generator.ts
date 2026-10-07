@@ -39,6 +39,8 @@ export interface World {
   people: Person[];
   crm: { accounts: Account[]; contacts: Contact[]; opportunities: Opportunity[]; activities: Activity[] };
   tickets: { projects: Project[]; members: { project_id: number; user_id: number }[]; tickets: Ticket[]; comments: Comment[] };
+  /** Groups as an identity provider would report them. The gateway policy refers to these. */
+  groups: Record<string, number[]>;
   /** The people the scripted session acts as, and the records it targets. */
   personas: { rep: number; manager: number; support: number; approver: number };
   targets: { escalationTicketId: number };
@@ -195,6 +197,11 @@ export function generateWorld(seed: number): World {
   return {
     seed,
     people,
+    groups: {
+      "emea-sales": [director, ...emeaSales].map((p) => p.id),
+      "emea-sales-leads": [regionalManagers.get("EMEA")!.id],
+      support: supportAgents.map((p) => p.id),
+    },
     crm: { accounts, contacts, opportunities, activities },
     tickets: { projects, members, tickets, comments },
     personas: {
