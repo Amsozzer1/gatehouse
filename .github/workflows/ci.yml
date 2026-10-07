@@ -37,6 +37,7 @@ jobs:
       - run: pnpm test
       # Re-measure and fail if any deterministic number differs from the committed results.
       - run: pnpm measure --check
+      - run: pnpm --filter web build
 
   leak-check:
     runs-on: ubuntu-24.04

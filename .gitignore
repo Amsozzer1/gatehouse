@@ -23,3 +23,7 @@ __pycache__/
 .DS_Store
 .env
 .env.*
+
+# Next.js
+apps/web/.next/
+apps/web/out/

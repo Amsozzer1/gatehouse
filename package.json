@@ -16,11 +16,14 @@
     "stack": "tsx scripts/stack.ts",
     "approve": "tsx packages/gateway/src/cli.ts approve",
     "reject": "tsx packages/gateway/src/cli.ts reject",
-    "measure": "tsx scripts/measure.ts"
+    "measure": "tsx scripts/measure.ts",
+    "dev": "pnpm --filter web dev",
+    "record": "pnpm --filter web build && tsx scripts/record-gif.ts"
   },
   "devDependencies": {
     "@types/node": "24.19.1",
     "@types/pg": "8.23.1",
+    "playwright": "1.63.0",
     "tsx": "4.23.15",
     "typescript": "7.0.2",
     "vitest": "5.0.3"
