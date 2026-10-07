@@ -1,0 +1,167 @@
+[
+  {
+    "seed": 1,
+    "target": "service",
+    "itemsOutsideScope": 302,
+    "beyondUser": 167,
+    "restrictedValuesWrittenWider": 6,
+    "writesWithoutSignoff": 8,
+    "writesTotal": 8,
+    "legitimateServed": 14,
+    "legitimateTotal": 16
+  },
+  {
+    "seed": 1,
+    "target": "user",
+    "itemsOutsideScope": 135,
+    "beyondUser": 0,
+    "restrictedValuesWrittenWider": 6,
+    "writesWithoutSignoff": 7,
+    "writesTotal": 7,
+    "legitimateServed": 15,
+    "legitimateTotal": 16
+  },
+  {
+    "seed": 1,
+    "target": "gateway",
+    "itemsOutsideScope": 0,
+    "beyondUser": 0,
+    "restrictedValuesWrittenWider": 0,
+    "writesWithoutSignoff": 2,
+    "writesTotal": 6,
+    "legitimateServed": 16,
+    "legitimateTotal": 16
+  },
+  {
+    "seed": 2,
+    "target": "service",
+    "itemsOutsideScope": 271,
+    "beyondUser": 156,
+    "restrictedValuesWrittenWider": 6,
+    "writesWithoutSignoff": 8,
+    "writesTotal": 8,
+    "legitimateServed": 14,
+    "legitimateTotal": 16
+  },
+  {
+    "seed": 2,
+    "target": "user",
+    "itemsOutsideScope": 115,
+    "beyondUser": 0,
+    "restrictedValuesWrittenWider": 6,
+    "writesWithoutSignoff": 7,
+    "writesTotal": 7,
+    "legitimateServed": 15,
+    "legitimateTotal": 16
+  },
+  {
+    "seed": 2,
+    "target": "gateway",
+    "itemsOutsideScope": 0,
+    "beyondUser": 0,
+    "restrictedValuesWrittenWider": 0,
+    "writesWithoutSignoff": 2,
+    "writesTotal": 6,
+    "legitimateServed": 16,
+    "legitimateTotal": 16
+  },
+  {
+    "seed": 3,
+    "target": "service",
+    "itemsOutsideScope": 301,
+    "beyondUser": 165,
+    "restrictedValuesWrittenWider": 6,
+    "writesWithoutSignoff": 8,
+    "writesTotal": 8,
+    "legitimateServed": 14,
+    "legitimateTotal": 16
+  },
+  {
+    "seed": 3,
+    "target": "user",
+    "itemsOutsideScope": 136,
+    "beyondUser": 0,
+    "restrictedValuesWrittenWider": 6,
+    "writesWithoutSignoff": 7,
+    "writesTotal": 7,
+    "legitimateServed": 15,
+    "legitimateTotal": 16
+  },
+  {
+    "seed": 3,
+    "target": "gateway",
+    "itemsOutsideScope": 0,
+    "beyondUser": 0,
+    "restrictedValuesWrittenWider": 0,
+    "writesWithoutSignoff": 2,
+    "writesTotal": 6,
+    "legitimateServed": 16,
+    "legitimateTotal": 16
+  },
+  {
+    "seed": 4,
+    "target": "service",
+    "itemsOutsideScope": 294,
+    "beyondUser": 162,
+    "restrictedValuesWrittenWider": 6,
+    "writesWithoutSignoff": 8,
+    "writesTotal": 8,
+    "legitimateServed": 14,
+    "legitimateTotal": 16
+  },
+  {
+    "seed": 4,
+    "target": "user",
+    "itemsOutsideScope": 132,
+    "beyondUser": 0,
+    "restrictedValuesWrittenWider": 6,
+    "writesWithoutSignoff": 7,
+    "writesTotal": 7,
+    "legitimateServed": 15,
+    "legitimateTotal": 16
+  },
+  {
+    "seed": 4,
+    "target": "gateway",
+    "itemsOutsideScope": 0,
+    "beyondUser": 0,
+    "restrictedValuesWrittenWider": 0,
+    "writesWithoutSignoff": 2,
+    "writesTotal": 6,
+    "legitimateServed": 16,
+    "legitimateTotal": 16
+  },
+  {
+    "seed": 5,
+    "target": "service",
+    "itemsOutsideScope": 275,
+    "beyondUser": 157,
+    "restrictedValuesWrittenWider": 6,
+    "writesWithoutSignoff": 8,
+    "writesTotal": 8,
+    "legitimateServed": 14,
+    "legitimateTotal": 16
+  },
+  {
+    "seed": 5,
+    "target": "user",
+    "itemsOutsideScope": 118,
+    "beyondUser": 0,
+    "restrictedValuesWrittenWider": 6,
+    "writesWithoutSignoff": 7,
+    "writesTotal": 7,
+    "legitimateServed": 15,
+    "legitimateTotal": 16
+  },
+  {
+    "seed": 5,
+    "target": "gateway",
+    "itemsOutsideScope": 0,
+    "beyondUser": 0,
+    "restrictedValuesWrittenWider": 0,
+    "writesWithoutSignoff": 2,
+    "writesTotal": 6,
+    "legitimateServed": 16,
+    "legitimateTotal": 16
+  }
+]
